@@ -1,0 +1,78 @@
+﻿@code {
+    private string searchQuery = "";
+    private List<string> filters = new() { "Tech", "Energy", "Finance", "Healthcare" };
+    private List<string> selectedFilters = new();
+
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback<List<string>> OnFilterChange { get; set; }
+
+    private async Task Search()
+    {
+        await OnSearch.InvokeAsync(searchQuery);
+    }
+
+    private async Task ToggleFilter(string filter)
+    {
+        if (selectedFilters.Contains(filter))
+        {
+            selectedFilters.Remove(filter);
+        }
+        else
+        {
+            selectedFilters.Add(filter);
+        }
+
+        await OnFilterChange.InvokeAsync(selectedFilters);
+    }
+}
+
+<div class="search-container">
+    <!-- Filter Chips -->
+    <div class="chip-container">
+        @foreach (var filter in filters)
+        {
+            <span class="chip @(selectedFilters.Contains(filter) ? "selected" : "")"
+                  @onclick="() => ToggleFilter(filter)">
+                @filter
+            </span>
+        }
+    </div>
+
+    <!-- Search Input -->
+    <input type="text" @bind="searchQuery" placeholder="Search stocks..." @oninput="Search" />
+
+</div>
+
+<style>
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chip-container {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .chip {
+        padding: 5px 12px;
+        background-color: #f0f0f0;
+        border-radius: 16px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .chip.selected {
+        background-color: #007bff;
+        color: white;
+    }
+
+    input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+    }
+</style>

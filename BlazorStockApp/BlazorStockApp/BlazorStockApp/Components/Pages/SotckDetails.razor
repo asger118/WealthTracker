@@ -1,0 +1,48 @@
+﻿@page "/stockdetails/{Ticker}"
+@attribute [StreamRendering]
+@inject FetchStockService FetchStockService
+
+<PageTitle>Stock</PageTitle>
+
+<h3>Stock Details for @Ticker</h3>
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">Error: @errorMessage</p>
+}
+else if (stock != null)
+{
+    <p>@stock.MetaData.Name</p>
+}
+else
+{
+    <p>No data available.</p>
+}
+
+@code {
+    [Parameter] public string Ticker { get; set; } = String.Empty;
+    private Stock? stock;
+    private string? errorMessage;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(1000);
+    
+        if (stock == null)
+        {
+            // Fetch the stock data and handle the response
+            var (fetchedStock, fetchErrorMessage) = await FetchStockService.GetStockAsync(Ticker);
+            stock = fetchedStock;
+            errorMessage = fetchErrorMessage;
+        }
+
+        // Once the data is loaded, stop the loading indicator
+        isLoading = false;
+    }
+
+
+}
