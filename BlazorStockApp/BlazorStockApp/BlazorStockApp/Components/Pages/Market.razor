@@ -1,5 +1,5 @@
 ﻿@page "/market"
-<h3>Market</h3>
+@attribute [Authorize(Roles = "user, admin")]
 
 <SearchBar />
 

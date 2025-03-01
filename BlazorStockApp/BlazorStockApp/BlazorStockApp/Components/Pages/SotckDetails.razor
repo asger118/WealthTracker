@@ -1,5 +1,6 @@
 ﻿@page "/stockdetails/{Ticker}"
 @attribute [StreamRendering]
+@attribute [Authorize(Roles = "user, admin")]
 @inject FetchStockService FetchStockService
 
 <PageTitle>Stock</PageTitle>

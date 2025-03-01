@@ -2,7 +2,9 @@ using BlazorStockApp.Components;
 using BlazorStockApp.Data.Contexts;
 using BlazorStockApp.Services;
 using BlazorStockApp.Shared.Mappers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +14,22 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<FetchStockService>(); // Register FetchStockService
 builder.Services.AddTransient<IStockMapper, StockMapper>();
 
+// Add user authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/access-denied";
+        options.Cookie.Name = "auth_token";
+        options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+// Add the DbContext to the container
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<StockDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
@@ -33,6 +49,8 @@ app.UseHttpsRedirection();;
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
