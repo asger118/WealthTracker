@@ -23,4 +23,8 @@
     <ProjectReference Include="..\BlazorStockApp.Shared\BlazorStockApp.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>

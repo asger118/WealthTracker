@@ -28,4 +28,12 @@
   
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Resources\Images\acces-denied.svg" />
+    <None Include="wwwroot\Resources\Images\login-icon.svg" />
+    <None Include="wwwroot\Resources\Images\logout-icon.svg" />
+    <None Include="wwwroot\Resources\Images\user-icon.svg" />
+    <None Include="wwwroot\Resources\Images\wallet-icon.png" />
+  </ItemGroup>
+
 </Project>

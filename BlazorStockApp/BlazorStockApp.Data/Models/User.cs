@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,5 +23,9 @@ namespace BlazorStockApp.Data.Models
 
         [DefaultValue("user")]
         public string Role { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CashBalance { get; set; }
+
+        List<UserStock> UserStocks { get; set; }
     }
 }

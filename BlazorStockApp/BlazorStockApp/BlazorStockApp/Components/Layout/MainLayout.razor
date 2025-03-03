@@ -12,10 +12,18 @@
         <AuthorizeView>
             <NotAuthorized>
                 <a href="login">Login</a>
+                <img src="/Resources/Images/login-icon.svg" style="max-height:1rem;" />
             </NotAuthorized>
             <Authorized>
-                <h3>Hello, @FirstName @LastName</h3>
-                <a href="logout">Logout</a>
+                <div style="display: flex; width:100%; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3>Hello @FirstName @LastName</h3>
+                    </div>
+                    <div>
+                        <a href="logout">Logout</a>
+                        <img src="/Resources/Images/logout-icon.svg" style="max-height:1rem;"/>
+                    </div>
+                </div>
             </Authorized>
         </AuthorizeView>
         </div>
