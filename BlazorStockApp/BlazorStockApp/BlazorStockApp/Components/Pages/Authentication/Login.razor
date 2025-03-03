@@ -18,12 +18,12 @@
             </div>
             <div class="mb-3">
                 <label>Email</label>
-                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                <InputText @bind-Value="Model.Email" class="form-control" type="email" placeholder="Email" />
                 <ValidationMessage For="@(() => Model.Email)" />
             </div>
             <div class="mb-3">
                 <label>Password</label>
-                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" />
+                <InputText @bind-Value="Model.Password" class="form-control" type="password" placeholder="Password" />
                 <ValidationMessage For="@(() => Model.Password)" />
             </div>
             <div class="mb-3 text-center">

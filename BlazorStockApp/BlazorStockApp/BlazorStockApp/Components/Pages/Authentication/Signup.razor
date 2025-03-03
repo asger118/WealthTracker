@@ -19,17 +19,17 @@
             </div>
             <div class="mb-3">
                 <label>First Name</label>
-                <InputText @bind-Value="Model.FirstName" class="form-control" placeholder="First Name" />
+                <InputText @bind-Value="Model.FirstName" class="form-control" placeholder="First Name" type="text"/>
                 <ValidationMessage For="@(() => Model.FirstName)" />
             </div>
             <div class="mb-3">
                 <label>Last Name</label>
-                <InputText @bind-Value="Model.LastName" class="form-control" placeholder="Last Name" />
+                <InputText @bind-Value="Model.LastName" class="form-control" placeholder="Last Name" type="text" />
                 <ValidationMessage For="@(() => Model.LastName)" />
             </div>
             <div class="mb-3">
                 <label>Email</label>
-                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email"  type="email"/>
                 <ValidationMessage For="@(() => Model.Email)" />
             </div>
             <div class="mb-3">
@@ -77,6 +77,8 @@
             LastName = Model.LastName,
             Role = "user"
         });
+
+        await DbContext.SaveChangesAsync();
 
         // Authentication successful, proceed with login
         ErrorMessage = null;
