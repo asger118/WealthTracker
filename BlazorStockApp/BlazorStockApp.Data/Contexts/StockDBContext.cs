@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorStockApp.Data.Contexts
 {
-    public class AppDbContext(DbContextOptions options) : DbContext(options)
+    public class AppDbContext : DbContext
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
         public DbSet<StockMeta> StockMeta { get; set; }
         public DbSet<User> Users { get; set; }
     }

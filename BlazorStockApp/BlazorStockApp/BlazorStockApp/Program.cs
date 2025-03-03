@@ -4,14 +4,13 @@ using BlazorStockApp.Services;
 using BlazorStockApp.Shared.Mappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<FetchStockService>(); // Register FetchStockService
+builder.Services.AddScoped<FetchStockService>();
 builder.Services.AddTransient<IStockMapper, StockMapper>();
 
 // Add user authentication
@@ -24,6 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "auth_token";
         options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
     });
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
@@ -45,7 +45,7 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();;
+app.UseHttpsRedirection(); ;
 
 app.UseStaticFiles();
 app.UseAntiforgery();
