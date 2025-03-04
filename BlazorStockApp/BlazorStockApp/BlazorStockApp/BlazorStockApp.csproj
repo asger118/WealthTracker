@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="PSC.Blazor.Components.Chartjs" Version="8.0.8" />
     <ProjectReference Include="..\..\BlazorStockApp.Data\BlazorStockApp.Data.csproj" />
     <ProjectReference Include="..\..\BlazorStockApp.Shared\BlazorStockApp.Shared.csproj" />
     <ProjectReference Include="..\BlazorStockApp.Client\BlazorStockApp.Client.csproj" />
@@ -34,6 +35,10 @@
     <None Include="wwwroot\Resources\Images\logout-icon.svg" />
     <None Include="wwwroot\Resources\Images\user-icon.svg" />
     <None Include="wwwroot\Resources\Images\wallet-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Resources\Fonts\" />
   </ItemGroup>
 
 </Project>

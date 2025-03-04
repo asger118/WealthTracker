@@ -1,6 +1,5 @@
 ﻿
 using BlazorStockApp.Data.Models;
-using BlazorStockApp.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorStockApp.Data.Contexts
@@ -11,9 +10,10 @@ namespace BlazorStockApp.Data.Contexts
         {
         }
         public DbSet<Sector> Sectors { get; set; }
-        public DbSet<StockMeta> StockMeta { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserStock> UserStocks { get; set; }
+        public DbSet<Stock> Stocks { get; set; }
+        public DbSet<RegularTradingPeriod> RegularTradingPeriods { get; set; }
     }
 }
 

@@ -58,4 +58,3 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(BlazorStockApp.Client._Imports).Assembly);
 
 app.Run();
-

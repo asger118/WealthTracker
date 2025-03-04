@@ -1,6 +1,7 @@
 ﻿@page "/stockdetails/{Ticker}"
 @attribute [StreamRendering]
 @attribute [Authorize(Roles = "user, admin")]
+@using BlazorStockApp.Shared.Models
 @inject FetchStockService FetchStockService
 
 <PageTitle>Stock</PageTitle>

@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.Security.Claims
+
 
 <div class="page">
     <div class="sidebar">
@@ -16,8 +16,9 @@
             </NotAuthorized>
             <Authorized>
                 <div style="display: flex; width:100%; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3>Hello @FirstName @LastName</h3>
+                    <div class="d-inline-flex">
+                        <h3 style="font-family:'poppins'; margin-right:0.5rem;">Welcome</h3>
+                        <h3 style="font-family:'poppins-bold';"> @FirstName!</h3>
                     </div>
                     <div>
                         <a href="logout">Logout</a>

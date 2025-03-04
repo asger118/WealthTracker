@@ -1,0 +1,88 @@
+﻿@page "/userstats"
+@using BlazorStockApp.Data.Contexts
+@using Microsoft.EntityFrameworkCore
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AppDbContext DbContext;
+
+<div style="width:20%; background-color:#3c404f; text-align:center;">
+    <div class="align-content-center">
+        <img src="/Resources/Images/user-icon.svg" style="height:3rem; width:3rem;"/>
+        <p class="text-center" style="color:wheat">@FirstName @LastName</p>
+    </div>
+    <hr style="border: 1px solid #000; width: 70%; margin: auto;" />
+    <div>
+        <p class="text-center" style="color:lightgrey; font-size:0.5rem;">Account Value</p>
+        <p class="text-center" style="color:white;">@TotalAccountValue</p>
+        <div class="d-inline-flex align-content-center" style="justify-content:center;">
+            <div>
+                <p class="text-center" style="color:lightgrey; font-size:0.5rem;">Total Profit</p>
+                <p class="text-center" style="color:@(TotalProfit >= 0 ? "green" : "red")">@TotalProfit</p>
+            </div>
+            <div style="border-left: 2px solid black; height: 4rem; margin: 0 1rem;"></div>
+            <div>
+                <p class="text-center" style="color:lightgrey; font-size:0.5rem;">Day Profit</p>
+                <p class="text-center" style="color:@(DayProfit >= 0 ? "green" : "red")">@DayProfit</p>
+            </div>
+        </div>
+    </div>
+    <hr style="border: 1px solid #000; width: 70%; margin: auto;" />
+    <div>
+        <Chart Config="_doughnutConfig"></Chart>
+    </div>
+</div>
+
+@code {
+    // Doughnut Chart
+    private DoughnutChartConfig _doughnutConfig;
+
+    // User Stats
+    private string? FirstName, LastName;
+    private float TotalAccountValue;
+    private float TotalProfit;
+    private float DayProfit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var email = user.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+            if (email != null)
+            {
+                var dbUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (dbUser != null)
+                {
+                    FirstName = dbUser.FirstName;
+                    LastName = dbUser.LastName;
+                    TotalAccountValue = dbUser.TotalAccountValue();
+                    TotalProfit = dbUser.TotalProfit();
+                    DayProfit = dbUser.DayProfit();
+                }
+            }
+        }
+        ConfigureDoughnutConfig();
+    }
+
+    private void ConfigureDoughnutConfig()
+    {
+        _doughnutConfig = new DoughnutChartConfig();
+
+        _doughnutConfig.Options = new Options
+        {
+            Responsive = true,
+        };
+   
+        foreach (var type in new[] {"Stock", "Fund", "ETF", "Crypto"})
+        {
+            _doughnutConfig.Data.Labels.Add(type);
+        }
+        var datasets = new DoughnutDataset
+        {
+            Label = "Asset Types",
+            BackgroundColor = new List<string> { "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0" }
+        };
+        _doughnutConfig.Data.Datasets.Add(datasets);
+    }
+}

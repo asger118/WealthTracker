@@ -10,11 +10,11 @@ namespace BlazorStockApp.Data.Models
         [Key]
         public int UserStockId { get; set; } // Primary Key
         public User User { get; set; } // Foreign Key
-        public StockMeta StockMeta { get; set; } // Foreign Key
+        public Stock Stock { get; set; } // Foreign Key
 
         public DateTime PurchaseDate { get; set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal PurchasePrice { get; set; }
+        public float PurchasePrice { get; set; }
         public int Quantity { get; set; }
     }
 }
