@@ -1,6 +1,6 @@
 ﻿@page "/login"
-@inject AppDbContext DbContext;
 @inject NavigationManager NavigationManager;
+@inject LoginService LoginService;
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
@@ -12,12 +12,12 @@
             </div>
             <div class="mb-3">
                 <label>Email</label>
-                <InputText @bind-Value="Model.Email" class="form-control" type="email" placeholder="Email" />
+                <InputText @bind-Value="Model.Email" class="form-control" type="email" placeholder="Email" autocomplete="email" />
                 <ValidationMessage For="@(() => Model.Email)" />
             </div>
             <div class="mb-3">
                 <label>Password</label>
-                <InputText @bind-Value="Model.Password" class="form-control" type="password" placeholder="Password" />
+                <InputText @bind-Value="Model.Password" class="form-control" type="password" placeholder="Password" autocomplete="current-password" />
                 <ValidationMessage For="@(() => Model.Password)" />
             </div>
             <div class="mb-3 text-center">
@@ -34,44 +34,16 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public HttpContext HttpContext { get; set; }
-
     [SupplyParameterFromForm]
-    public LoginViewModel Model { get; set; } = new();
+    public LoginViewModel Model { get; set; } = new LoginViewModel();
     private string? ErrorMessage;
 
     private async Task Authenticate()
     {
-        var user = DbContext.Users.Where(u => u.Email == Model.Email).FirstOrDefault();
-        if (user == null)
+        ErrorMessage = await LoginService.AuthenticateAsync(Model.Email, Model.Password);
+        if (ErrorMessage == null)
         {
-            ErrorMessage = "No user with this email exists";
-            return;
+            NavigationManager.NavigateTo("/");
         }
-
-        var passwordHasher = new PasswordHasher<User>();
-        var verificationResult = passwordHasher.VerifyHashedPassword(user, user.Password, Model.Password);
-
-        if (verificationResult == PasswordVerificationResult.Failed)
-        {
-            ErrorMessage = "Incorrect password";
-            return;
-        }
-
-        // Authentication successful, proceed with login
-        ErrorMessage = null;
-
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.GivenName, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-        await HttpContext.SignInAsync(principal);
-        NavigationManager.NavigateTo("/");
     }
 }

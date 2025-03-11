@@ -1,10 +1,10 @@
 using WealthTracker.Components;
 using WealthTracker.Contexts;
 using WealthTracker.Services;
-using WealthTracker.Models.Mappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using WealthTracker.Models.Data;
+using WealthTracker.Models.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<FetchStockService>();
-//builder.Services.AddTransient<IStockMapper, StockMapper>();
+builder.Services.AddScoped<UserStockMapper>();
+builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<SignupService>();
+
 
 // Add user authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -28,9 +31,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
+// Add Antiforgery
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
+// Add IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddBlazorBootstrap();
+
 // Add the DbContext to the container
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
@@ -51,13 +65,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapStaticAssets();
+app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();

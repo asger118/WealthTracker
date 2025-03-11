@@ -1,0 +1,105 @@
+﻿@inject AppDbContext DbContext;
+@using Microsoft.EntityFrameworkCore;
+@rendermode InteractiveServer
+<h3>Registered Users</h3>
+<table class="table w-50">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Users)
+        {
+            <tr @key="user.UserId">
+                @if (isEditing && editingUser.UserId == user.UserId)
+                {
+                    <td><InputText class="form-control" @bind-Value="editingUser.FirstName" /></td>
+                    <td><InputText class="form-control" @bind-Value="editingUser.LastName" /></td>
+                    <td><InputText class="form-control" @bind-Value="editingUser.Email" /></td>
+                    <td>
+                        <InputSelect class="form-control" @bind-Value="editingUser.Role">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </InputSelect>
+                    </td>
+                    <td>
+                        <button class="btn btn-success" @onclick="SaveEdit">Save</button>
+                        <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </td>
+                }
+                else
+                {
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditUser(user)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteUser(user.UserId)">Delete</button>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+@code {
+    private List<User> Users = new List<User>();
+    private User editingUser = new User();
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await DbContext.Users.ToListAsync();
+    }
+
+    private void EditUser(User user)
+    {
+        editingUser = new User
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = user.Role
+            };
+        isEditing = true;
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        var user = await DbContext.Users.FindAsync(userId);
+        if (user != null)
+        {
+            DbContext.Users.Remove(user);
+            await DbContext.SaveChangesAsync();
+            Users.Remove(user);
+        }
+    }
+
+    private async Task SaveEdit()
+    {
+        var userInDb = await DbContext.Users.FindAsync(editingUser.UserId);
+        if (userInDb != null)
+        {
+            userInDb.FirstName = editingUser.FirstName;
+            userInDb.LastName = editingUser.LastName;
+            userInDb.Email = editingUser.Email;
+            userInDb.Role = editingUser.Role;
+
+            await DbContext.SaveChangesAsync();
+        }
+
+        Users = await DbContext.Users.ToListAsync();
+        isEditing = false;
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+    }
+}

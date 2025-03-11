@@ -1,5 +1,6 @@
 ﻿@page "/market"
 @attribute [Authorize(Roles = "user, admin")]
+@attribute [StreamRendering]
 
 <SearchBar />
 

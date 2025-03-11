@@ -1,6 +1,5 @@
 ﻿@page "/signup"
-@inject AppDbContext DbContext;
-@inject NavigationManager NavigationManager;
+@inject SignupService SignupService;
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
@@ -12,27 +11,27 @@
             </div>
             <div class="mb-3">
                 <label>First Name</label>
-                <InputText @bind-Value="Model.FirstName" class="form-control" placeholder="First Name" type="text"/>
+                <InputText @bind-Value="Model.FirstName" class="form-control" placeholder="First Name" type="text" autocomplete="given-name" />
                 <ValidationMessage For="@(() => Model.FirstName)" />
             </div>
             <div class="mb-3">
                 <label>Last Name</label>
-                <InputText @bind-Value="Model.LastName" class="form-control" placeholder="Last Name" type="text" />
+                <InputText @bind-Value="Model.LastName" class="form-control" placeholder="Last Name" type="text" autocomplete="family-name" />
                 <ValidationMessage For="@(() => Model.LastName)" />
             </div>
             <div class="mb-3">
                 <label>Email</label>
-                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email"  type="email"/>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email" type="email" autocomplete="email" />
                 <ValidationMessage For="@(() => Model.Email)" />
             </div>
             <div class="mb-3">
                 <label>Password</label>
-                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" type="password" />
+                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" type="password" autocomplete="new-password" />
                 <ValidationMessage For="@(() => Model.Password)" />
             </div>
             <div class="mb-3">
                 <label>Confirm Password</label>
-                <InputText @bind-Value="Model.ConfirmPassword" class="form-control" placeholder="Confirm Password" type="password" />
+                <InputText @bind-Value="Model.ConfirmPassword" class="form-control" placeholder="Confirm Password" type="password" autocomplete="new-password" />
                 <ValidationMessage For="@(() => Model.ConfirmPassword)" />
             </div>
             <div class="mb-3 text-center">
@@ -46,50 +45,13 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public HttpContext HttpContext { get; set; }
-
     [SupplyParameterFromForm]
-    public SignupViewModel Model { get; set; } 
+    public SignupViewModel Model { get; set; } = new SignupViewModel();
+
     private string? ErrorMessage;
 
     private async Task Authenticate()
     {
-        var user = DbContext.Users.Where(u => u.Email == Model.Email).FirstOrDefault();
-        if (user != null)
-        {
-            ErrorMessage = "User already exists";
-            return;
-        }
-
-        var newUser = new User
-        {
-            Email = Model.Email,
-            FirstName = Model.FirstName,
-            LastName = Model.LastName,
-            Role = "user"
-        };
-
-        // Hash the password
-        var passwordHasher = new PasswordHasher<User>();
-        newUser.Password = passwordHasher.HashPassword(newUser, Model.Password); 
-
-        await DbContext.Users.AddAsync(newUser);
-        await DbContext.SaveChangesAsync();
-
-        // Authentication successful, proceed with login
-        ErrorMessage = null;
-
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.GivenName, newUser.FirstName),
-            new Claim(ClaimTypes.Surname, newUser.LastName),
-            new Claim(ClaimTypes.Role, "user")
-        };
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-        await HttpContext.SignInAsync(principal);
-        NavigationManager.NavigateTo("/");
+        ErrorMessage = await SignupService.RegisterUser(Model);
     }
 }

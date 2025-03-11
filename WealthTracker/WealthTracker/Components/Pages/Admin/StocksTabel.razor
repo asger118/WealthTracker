@@ -1,0 +1,195 @@
+﻿@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+@inject FetchStockService FetchStockService
+@attribute [StreamRendering]
+@inject UserStockMapper UserStockMapper
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Antiforgery;
+@attribute [RequireAntiforgeryToken(required: false)]
+
+<h3>Registered Stocks</h3>
+<table class="table w-50">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th>Sector</th>
+            <th>Asset Type</th>
+            <th>Icon</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var stock in stocks)
+        {
+            <tr @key="stock.Ticker">
+                @if (isEditing && editingStock.Ticker == stock.Ticker)
+                {
+                    <td>@stock.Ticker</td>
+                    <td>@stock.Name</td>
+                    <td>
+                        <InputSelect class="form-control" @bind-Value="editingStock.SectorId">
+                            @foreach (var sector in sectors)
+                            {
+                                <option value="@sector.SectorId">@sector.SectorName</option>
+                            }
+                        </InputSelect>
+                    </td>
+                    <td>
+                        <InputSelect class="form-control" @bind-Value="editingStock.AssetTypeId">
+                            @foreach (var assetType in assetTypes)
+                            {
+                                <option value="@assetType.AssetTypeId">@assetType.Name</option>
+                            }
+                        </InputSelect>
+                    </td>
+                    <td>placeholder for icon</td>
+                    <td>
+                        <button class="btn btn-success" @onclick="SaveEdit">Save</button>
+                        <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </td>
+                }
+                else
+                {
+                    <td>@stock.Ticker</td>
+                    <td>@stock.Name</td>
+                    <td>@sectors.FirstOrDefault(s => s.SectorId == stock.SectorId)?.SectorName</td>
+                    <td>@assetTypes.FirstOrDefault(a => a.AssetTypeId == stock.AssetTypeId)?.Name</td>
+                    <td>placeholder for icon</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditStock(stock)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteStock(stock.Ticker)">Delete</button>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Add New Stock</h3>
+<EditForm Model="newStock" OnValidSubmit="AddStock" style="width:10rem;" FormName="AddStockForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="ticker">Ticker</label>
+        <InputText id="ticker" class="form-control mb-2" @bind-Value="newStock.Ticker" type="text" autocomplete="off" />
+    </div>
+    <div class="mb-3 text-center">
+        <span class="text-danger">@ErrorMessage</span>
+    </div>
+    <button type="submit" class="btn btn-success">Add Stock</button>
+</EditForm>
+
+@code {
+    private List<Stock> stocks = new List<Stock>();
+    private List<Sector> sectors = new List<Sector>();
+    private List<AssetType> assetTypes = new List<AssetType>();
+    private Stock newStock = new Stock();
+    private Stock editingStock = new Stock();
+    private bool isEditing = false;
+    private string? ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var DbContext = DbContextFactory.CreateDbContext();        
+        stocks = await DbContext.Stocks.ToListAsync();
+        sectors = await DbContext.Sectors.ToListAsync();
+        assetTypes = await DbContext.AssetTypes.ToListAsync();
+    }
+
+    private async Task AddStock()
+    {
+        Rootobject? stockDTO;
+        (stockDTO, ErrorMessage) = await FetchStockService.GetStockAsync(newStock.Ticker);
+        if (stockDTO != null)
+        {
+            newStock = UserStockMapper.Map(stockDTO);
+            ErrorMessage = null;
+        }
+
+        try
+        {
+            using var DbContext = DbContextFactory.CreateDbContext();
+            DbContext.Stocks.Add(newStock);
+            await DbContext.SaveChangesAsync();
+            stocks.Add(newStock);
+            newStock = new Stock();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., log the error, show a message to the user)
+            Console.Error.WriteLine($"Error adding stock: {ex.Message}");
+        }
+    }
+
+    private void EditStock(Stock stock)
+    {
+        isEditing = true;
+        editingStock = new Stock
+            {
+                Ticker = stock.Ticker,
+                Name = stock.Name,
+                SectorId = stock.SectorId,
+                AssetTypeId = stock.AssetTypeId,
+                Icon = stock.Icon
+            };
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            using var DbContext = DbContextFactory.CreateDbContext();
+            var stock = await DbContext.Stocks.FindAsync(editingStock.Ticker);
+            if (stock != null)
+            {
+                stock.SectorId = editingStock.SectorId;
+                stock.AssetTypeId = editingStock.AssetTypeId;
+                stock.Icon = editingStock.Icon;
+                await DbContext.SaveChangesAsync();
+                var index = stocks.FindIndex(s => s.Ticker == stock.Ticker);
+                if (index != -1)
+                {
+                    stocks[index] = stock;
+                }
+            }
+            isEditing = false;
+            editingStock = new Stock();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Handle concurrency exception
+            Console.Error.WriteLine($"Concurrency error saving stock: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions
+            Console.Error.WriteLine($"Error saving stock: {ex.Message}");
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+        editingStock = new Stock();
+    }
+
+    private async Task DeleteStock(string ticker)
+    {
+        try
+        {
+            using var DbContext = DbContextFactory.CreateDbContext();
+            var stock = await DbContext.Stocks.FindAsync(ticker);
+            if (stock != null)
+            {
+                DbContext.Stocks.Remove(stock);
+                await DbContext.SaveChangesAsync();
+                stocks.Remove(stock);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., log the error, show a message to the user)
+            Console.Error.WriteLine($"Error deleting stock: {ex.Message}");
+        }
+    }
+}

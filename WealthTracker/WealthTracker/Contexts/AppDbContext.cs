@@ -23,7 +23,9 @@ namespace WealthTracker.Contexts
     }
 }
 
-// Create migration:
-//      dotnet ef migrations add Initial
-// Update database with migration:
-//      dotnet ef database update
+
+// dotnet ef migrations add <migration name>
+
+// dotnet ef database update
+
+// dotnet ef database drop

@@ -35,6 +35,7 @@ namespace WealthTracker.Services
             if (response.IsSuccessStatusCode)
             {
                 stockDTO = await response.Content.ReadFromJsonAsync<Rootobject>();
+                Console.WriteLine(stockDTO);
             }
             else
             {
