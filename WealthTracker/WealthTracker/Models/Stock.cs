@@ -30,5 +30,26 @@ namespace WealthTracker.Models
         public int TimezoneDifference { get; set; } // The difference in seconds between local time and UTC
         public float YearlyHigh { get; set; }
         public float YearlyLow { get; set; }
+
+
+        public float ChangeSinceLastClose()
+        {
+            // Avoid division by zero
+            if (PreviousClose == 0)
+            {
+                return 0;
+            }
+
+            return (float)Math.Round(CurrentPrice - PreviousClose, 2);
+        }
+        public float PercentChangeSinceLastClose()
+        {
+            // Avoid division by zero
+            if (PreviousClose == 0)
+            {
+                return 0;
+            }
+            return (float)Math.Round((CurrentPrice - PreviousClose) / PreviousClose, 2);
+        }
     }
 }

@@ -1,7 +1,55 @@
 ﻿@page "/portfolio"
 @attribute [StreamRendering]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbContextFactory
 
+
+<h1>Portfolio</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Purchase Price</th>
+            <th>Value</th>
+            <th>Change</th>
+            <th>Change %</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @foreach (var userstock in userStocks)
+            {
+                <td>@userstock.Stock.Name</td>
+                <td>@userstock.Quantity</td>
+                <td>@userstock.PurchasePrice</td>
+                <td>@userstock.TotalValue()</td>
+                <td>@userstock.Profit()</td>
+                <td>@userstock.ProfitPercent()</td>
+            }
+        </tr>
+    </tbody>
+</table>
 
 @code {
+    private User? User;
+    private List<UserStock> userStocks = new List<UserStock>();
 
+    
+    protected override async Task OnInitializedAsync()
+    {
+        using var DbContext = DbContextFactory.CreateDbContext();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userEmail = user.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        User = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+        // Get all stocks that the user has an join table entries from UserStocks
+        userStocks = await DbContext.UserStocks
+            .Where(us => us.User == User)
+            .ToListAsync();
+    }
 }

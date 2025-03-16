@@ -49,7 +49,8 @@ public class SignupService
         {
             new Claim(ClaimTypes.GivenName, newUser.FirstName),
             new Claim(ClaimTypes.Surname, newUser.LastName),
-            new Claim(ClaimTypes.Role, "user")
+            new Claim(ClaimTypes.Role, "user"),
+            new Claim(ClaimTypes.Email, newUser.Email)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -13,5 +13,28 @@ namespace WealthTracker.Models
         [Column(TypeName = "decimal(18,2)")]
         public float PurchasePrice { get; set; }
         public int Quantity { get; set; }
+
+
+        public float TotalValue()
+        {
+            return Stock.CurrentPrice * Quantity;
+        }
+
+        public float Profit()
+        {
+            return TotalValue() - PurchasePrice * Quantity;
+        }
+
+        public float ProfitPercent()
+        {
+            return (Stock.CurrentPrice - PurchasePrice) / PurchasePrice;
+        }
+
+        public float PercentChangeSinceLastClose()
+        {
+            return (Stock.CurrentPrice - Stock.PreviousClose) / Stock.PreviousClose;
+        }
+
+
     }
 }

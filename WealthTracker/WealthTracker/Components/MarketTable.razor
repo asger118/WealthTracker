@@ -1,0 +1,42 @@
+﻿@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Change</th>
+            <th>% Change</th>
+            <th>Volume</th>
+            <th>Exchange</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var stock in Stocks)
+        {
+            <tr>
+                <td>@stock.Name</td>
+                <td>@stock.CurrentPrice</td>
+                <td>@stock.CurrentHigh</td>
+                <td>@stock.CurrentLow</td>
+                <td>@stock.ChangeSinceLastClose()</td>
+                <td>@stock.PercentChangeSinceLastClose()</td>
+                <td>@stock.CurrentVolume</td>
+                <td>@stock.ExchangeName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Stock> Stocks = new List<Stock>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var DbContext = DbContextFactory.CreateDbContext();
+        Stocks = await DbContext.Stocks.ToListAsync();
+    }
+}
